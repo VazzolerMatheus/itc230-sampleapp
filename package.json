@@ -1,0 +1,22 @@
+{
+  "name": "itc230",
+  "version": "1.0.0",
+  "description": "sample app for itc230",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/VazzolerMatheus/itc230-sampleapp.git"
+  },
+  "author": "Matheus Vazzoler",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/VazzolerMatheus/itc230-sampleapp/issues"
+  },
+  "homepage": "https://github.com/VazzolerMatheus/itc230-sampleapp#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
