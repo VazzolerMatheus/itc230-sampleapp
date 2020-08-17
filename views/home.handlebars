@@ -1,0 +1,12 @@
+<title> Home page </title>
+<h1> Home page </h1>
+<p>Number of items in array: {{numberOfItems}}</p>
+
+<p>List of Albums:</p>
+
+{{title}}
+
+
+{{#each title}}
+<li><a href="/details?title={{.}}">{{.}}</a></li>
+{{/each}}
