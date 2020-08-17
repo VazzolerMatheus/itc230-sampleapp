@@ -45,14 +45,15 @@ app.set("view engine", "handlebars");
 
 //Home Page
 app.get('/', (req, res) => {
- //console.log(req.query);
- 
- var fullItems = data.getAll();
- var title = [];
+ let fullItems = data.getAll();
+ let title = [];
 
  for (var i = 0; i < data.getAll().length; i++){
  	title.push(fullItems[i]['title']);
  }
+
+ let test = data.getItem('111');
+ console.log(test);
 
  res.render('home', {numberOfItems: data.getAll().length, title: title}); 
 
@@ -60,7 +61,7 @@ app.get('/', (req, res) => {
 
 //Details Page
 app.get('/details', (req, res) => {
- var query = req.query;
+ let query = req.query;
  res.render('details', {title: query['title']}); 
 });
 

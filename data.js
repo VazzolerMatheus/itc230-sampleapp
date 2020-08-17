@@ -13,3 +13,34 @@ exports.getAll = () => {
 	return albums
 }
 
+exports.getItem = (title) => {
+
+    return albums.find((albums) => {
+
+    return albums.title === title;
+
+    })
+};
+
+exports.addItem = (addAlbum) => { 
+
+    
+    albums.push(addAlbum)
+
+    return { 'success': true }
+    }
+
+
+exports.deleteItem = (title) => {
+
+    if (albums.some(item => item.title === title) === false) {
+        return { 'success': false }
+
+    }
+
+    else {
+
+        let newAlbum = albums.filter(albums => albums.title !== title)
+        return { 'success': true }
+    }
+}
