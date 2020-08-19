@@ -29,7 +29,8 @@
 
 
 'use strict'
-const data = require("./data");
+
+const Data = require("./models/albums");
 const express = require("express");
 const bodyParser = require("body-parser")
 const exphbs = require("express-handlebars"); // should be at top of module 
@@ -44,25 +45,29 @@ app.set("view engine", "handlebars");
 
 
 //Home Page
-app.get('/', (req, res) => {
- let fullItems = data.getAll();
- let title = [];
+app.get('/', (req, res, next) => {
 
- for (var i = 0; i < data.getAll().length; i++){
- 	title.push(fullItems[i]['title']);
- }
+ Data.find({}).lean()
+    .then((items) => {
+    res.render('home', {item: items});
 
- let test = data.getItem('111');
- console.log(test);
-
- res.render('home', {numberOfItems: data.getAll().length, title: title}); 
+   });
 
 });
 
+
 //Details Page
-app.get('/details', (req, res) => {
- let query = req.query;
- res.render('details', {title: query['title']}); 
+app.get('/details', (req, res, next) => {
+ let query = req.query.title;
+ // res.render('details', {title: query['title']}); 
+ Data.findOne({'title': query}).lean()
+    .then((items) => {
+    res.render('details', {item: items});
+
+   });
+
+
+
 });
 
 
