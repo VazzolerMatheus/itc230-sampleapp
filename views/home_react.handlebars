@@ -1,0 +1,138 @@
+<html>
+
+<head>
+  <title>React App Demo</title>
+
+  <script src="https://unpkg.com/react@16/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
+  <!-- Don't use this in production: -->
+  <script src="https://unpkg.com/babel-standalone@6.15.0/babel.min.js"></script>
+</head>
+
+<body>
+
+  <div id="root"></div>
+  <script type="text/babel">
+    const Albums = (props) => {
+      console.log(props)
+      return <div>
+        <h1>Click one for more details</h1>
+        <ul>
+          {props.items.map(item => <li onClick={props.clickHandler} key={item.title}>{item.title}</li>)}
+        </ul>
+      </div>
+    }
+    const DetailedAlbum = (props) => {
+      return <div>
+        <form>
+          <p>Title : {props.item.title}</p>
+
+          <input onChange={props.changeHandler} type="hidden" name="title" value={props.item.title || ""} />
+
+          <p>Artist : <input onChange={props.changeHandler} type="text" name="artist" value={props.item.artist || ""} /></p>
+          <p>Year : <input onChange={props.changeHandler} type="text" name="year" value={props.item.year || ""} /></p>
+          <p>Tracks : <input onChange={props.changeHandler} type="text" name="tracks" value={props.item.tracks || ""} /></p>
+        </form>
+        <button onClick={props.saveHandler} >Save</button> <br />
+        <button onClick={props.onReset}>Reset</button> <br />
+        <button onClick={props.onDelete} >Delete</button>
+      </div>
+    }
+    class App extends React.Component {
+      constructor(props) {
+        super(props);
+        // Set initial state using data from server application
+        this.state = {
+          items: {{{albums}}},
+      currentItem: {}
+    }
+    
+    this.handleClick = this.handleClick.bind(this);
+    this.handleChange = this.handleChange.bind(this);
+    this.postChange = this.postChange.bind(this);
+    this.onReset = this.onReset.bind(this);
+    this.onDelete = this.onDelete.bind(this);
+  }
+
+    handleClick(e) {
+      let clicked = e.target.innerText
+      let newAlbum = this.state.items.find((item) => {
+        return item.title == clicked
+      })
+      this.setState({
+        currentItem: newAlbum
+      });
+    }
+
+    handleChange(e){
+      console.log(e.target.value);
+      var newItem = this.state.currentItem;
+      newItem[event.target.name] = event.target.value;
+      this.setState({ currentItem: newItem });
+    }
+
+
+
+    postChange(){
+      const newAlbum = this.state.currentItem;
+      if (!newAlbum.title) {
+        return;
+      }
+
+      delete newAlbum["_id"];
+
+      fetch("/api/v1/albums/add", {
+        method: "POST",
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newAlbum)
+      })
+        .then(res => res.json())
+        .then((data) => {
+          console.log(data);
+          if (data.fileChanged > 0) { 
+            const newItems = this.state.items
+            this.setState({ items: newItems });
+            alert("Data Updated");
+          }
+          else {
+            alert("New dada added")
+            const newItems = this.state.items
+            newItems.push(newAlbum);
+            this.setState({ items: newItems });
+          }
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    }
+    onReset(){
+      this.setState({ currentItem: {} });
+    }
+    onDelete(){
+      let deleteTitle = this.state.currentItem.title;
+      fetch("/api/v1/albums/delete/" + deleteTitle)
+        .then((response) => {
+          return response.json();
+        })
+        .then((result) => {
+          console.log(result)
+          const newItem = this.state.items.filter(album => album.title !== deleteTitle)
+          this.setState({ items: newItem });
+          alert("Data deleted");
+        })
+        .catch(err => console.log(err))
+    }
+    render() {
+      return (
+        <div>
+          <Albums items={this.state.items} clickHandler={this.handleClick} />
+          <DetailedAlbum item={this.state.currentItem} changeHandler={this.handleChange} saveHandler={this.postChange} onReset={this.onReset} onDelete={this.onDelete} />
+        </div>
+      );
+    }
+    }
+    ReactDOM.render(<App />, document.getElementById('root'));
+  </script>
+</body>
+
+</html>

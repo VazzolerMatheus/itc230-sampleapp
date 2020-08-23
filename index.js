@@ -50,7 +50,9 @@ app.set("view engine", "handlebars");
 app.get('/', (req, res, next) => {
  Data.find({}).lean()
     .then((items) => {
-    res.render('home', {item: items});
+
+    console.log(JSON.stringify(items));
+    res.render('home_react', {albums: JSON.stringify(items)});
    });
 });
 
