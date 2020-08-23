@@ -39,6 +39,8 @@ const app = express();
 app.set('port', process.env.PORT || 3000);
 app.use(express.static(__dirname + '/public')); // set location for static files
 app.use(bodyParser.urlencoded({extended: true})); // parse form submissions
+app.use(bodyParser.json());
+app.use('/api', require('cors')());
 
 app.engine('handlebars', exphbs({defaultLayout: false}));
 app.set("view engine", "handlebars");
@@ -46,13 +48,23 @@ app.set("view engine", "handlebars");
 
 //Home Page
 app.get('/', (req, res, next) => {
-
  Data.find({}).lean()
     .then((items) => {
     res.render('home', {item: items});
-
    });
+});
 
+//api home
+app.get('/api/v1/albums', (req, res, next) => {
+ Data.find({}).lean()
+    .then((items) => {
+    
+    if(items){
+    	res.json(items);
+    }else{
+    	return res.status(500).send('Error occurred: database error.');
+    }
+   });
 });
 
 
@@ -63,13 +75,75 @@ app.get('/details', (req, res, next) => {
  Data.findOne({'title': query}).lean()
     .then((items) => {
     res.render('details', {item: items});
-
    });
-
-
-
 });
 
+
+//api from one
+app.get('/api/v1/albums/:title', (req, res) => {
+ Data.findOne({'title': req.params.title}).lean()
+ 	.then((items) => {
+    
+    if(items){
+    	res.json(items);
+    }else{
+    	return res.status(500).send('Error occurred: database error.');
+    }
+
+   });
+});
+
+
+app.get('/delete/:title', (req, res, next) => {
+  Data.deleteOne({"title": req.params.title }).lean()
+    .then(() => {
+      res.set('Content-Type', 'text/html')
+      res.send(
+    `<p>Item deleted</p>
+     <p><a href = "/">Home</a></p>`);
+    })
+    .catch(err => next(err));
+})
+
+//api delete
+app.get('/api/v1/albums/delete/:title', (req, res) => {
+ Data.deleteOne({'title': req.params.title}).lean()
+    .then((items) => {
+    
+    if(items){
+    	res.json({filesDeleted: items.deletedCount});
+    }else{
+    	return res.status(500).send('Error occurred: database error.');
+    }
+
+   });
+});
+
+app.post('/api/v1/albums/add', (req, res) => {
+
+  const newItem = req.body;
+
+
+  Data.updateOne({ title: newItem.title }, newItem, { upsert: true }, (err, result) => {
+
+    if (result.nModified == 0) {
+    	console.log('Album added');
+      	res.json({ fileChanged: result.nModified , filesFound : result.n})
+
+      	//res.json({ fileMatched: result.n })
+    } else if(result.nModified > 0) {
+    	console.log('Album modifed');
+     	res.json({ fileChanged: result.nModified, filesFound : result.n})
+      	//res.json({ fileMatched: result.n })
+    }
+
+  })
+})
+
+
+
+
+//________________________________________________________________________-
 
 //About Page
 app.get('/about', (req, res) => {
